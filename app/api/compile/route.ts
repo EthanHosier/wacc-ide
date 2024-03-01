@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       {
         error: "Error compiling wacc to asm",
         compilerStatus: result.status,
-        output: result.stdout.toString(),
+        output: result.stdout.toString().split("Compiling file.wacc...")[1],
       },
       { status: 200 }
     );

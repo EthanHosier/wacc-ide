@@ -1,2 +1,3 @@
-begi
- println "yeahh" end
+begin 
+	println "s" + 1
+end

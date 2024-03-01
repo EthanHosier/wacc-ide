@@ -69,3 +69,20 @@ export const getFileFromLocalStorage = (filename: string): string | null => {
 };
 
 export const DEFAULT_FILE_CONTENTS = `begin ${"\n\t"}println "Hello Wacc"${"\n"}end`;
+
+export const splitAtEndOfSentence = (inputString: string) => {
+  if (!inputString) {
+    return [];
+  }
+
+  const sentenceSplitPattern = /[.!?]+/;
+
+  // Use the pattern to split the string
+  const sentences = inputString.split(sentenceSplitPattern);
+
+  // Remove empty strings from the result
+  const nonEmptySentences = sentences.filter(
+    (sentence) => sentence.trim() !== ""
+  );
+  return nonEmptySentences;
+};
