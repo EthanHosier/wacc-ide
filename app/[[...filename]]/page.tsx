@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/resizable";
 import Output from "./_components/output";
 import Header from "./_components/header";
+import Input from "./_components/input-section";
 const Page = ({ params }: any) => {
   return (
     <div className="min-h-screen flex-1">
@@ -14,14 +15,18 @@ const Page = ({ params }: any) => {
         direction="vertical"
         className="min-h-screen w-screen"
       >
-        <ResizablePanel defaultSize={75}>
+        <ResizablePanel defaultSize={60}>
           <Header filename={params.filename} />
           <div className="h-full">
             {<MonacoWrapper filename={params.filename} />}
           </div>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={25}>
+        <ResizablePanel defaultSize={20}>
+          <Input />
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={20}>
           <Output />
         </ResizablePanel>
       </ResizablePanelGroup>

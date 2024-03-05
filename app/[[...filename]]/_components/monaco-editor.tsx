@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import { Button } from "@/components/ui/button";
-import * as monaco_editor from "monaco-editor";
+
 import { editor } from "monaco-editor";
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import {
@@ -13,10 +12,13 @@ import {
 } from "@/wacc-syntax-rules";
 import {
   DEFAULT_FILE_CONTENTS,
+  extractErrorInformation,
+  findSemanticErrorLocation,
   getFileFromLocalStorage,
   storeRecordInLocalStorage,
 } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { ideStore } from "@/app/store/ide";
 
 interface MonacoEditorProps {
   fileName: string;
@@ -26,6 +28,11 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
   const monaco = useMonaco();
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const savedFileContents = getFileFromLocalStorage(fileName);
+  const store = ideStore((state: any) => state);
+
+  const [editor, setEditor] = useState<editor.IStandaloneCodeEditor | null>(
+    null
+  );
 
   useEffect(() => {
     if (!monaco) return;
@@ -47,7 +54,31 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
     };
   }, [monaco]);
 
+  useEffect(() => {
+    if (!monaco || !store.error || !editor) return;
+
+    console.log(findSemanticErrorLocation(editor.getValue(), store.error));
+
+    const errorInfo = extractErrorInformation(store.error);
+    if (!errorInfo) return;
+    const errorMarker = {
+      severity: monaco.MarkerSeverity.Error,
+      message: errorInfo.errorText,
+      startLineNumber: errorInfo.lineNumber,
+      startColumn: errorInfo.columnNumber,
+      endLineNumber: errorInfo.lineNumber,
+      endColumn: errorInfo.columnNumber + 1,
+    };
+    monaco.editor.setModelMarkers(editor.getModel()!, "your-marker-key", [
+      errorMarker,
+    ]);
+  }, [store.error]);
+
   const handleEditorChange = (value: string | undefined, event: any) => {
+    if (monaco && editor) {
+      monaco.editor.setModelMarkers(editor.getModel()!, "your-marker-key", []);
+    }
+
     if (!value) return;
 
     // Clear existing timeout if any
@@ -55,7 +86,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
       clearTimeout(saveTimeout.current);
     }
 
-    // Set a new timeout to save the file after 2 seconds of inactivity7
+    // Set a new timeout to save the file after 300 ms of inactivity
     saveTimeout.current = setTimeout(() => {
       storeRecordInLocalStorage(fileName, value);
     }, 300);
@@ -64,14 +95,19 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
   return (
     <>
       {!savedFileContents ? (
-        <div className="p-4">Error: File not found</div>
+        <div className="p-4">{fileName && "Error: {fileName} not found"}</div>
       ) : (
         <Editor
+          onMount={(editor, monaco) => setEditor(editor)}
           height="100%"
           width="full"
           defaultLanguage="wacc" // Set the default language to "wacc"
           defaultValue={savedFileContents ?? DEFAULT_FILE_CONTENTS}
-          options={{ selectOnLineNumbers: true }}
+          options={{
+            selectOnLineNumbers: true,
+            matchBrackets: "always",
+            tabSize: 2,
+          }}
           // onMount={handleEditorDidMount}
           theme="wacc-theme"
           loading={<Loader2 className="animate-spin" />}

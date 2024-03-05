@@ -19,48 +19,47 @@ const Header: React.FC<HeaderProps> = ({ filename }) => {
 
   const onClick = async () => {
     setIsLoading(true);
-    store.reset();
-    store.setOutput("Compiling...");
 
-    const regex = /\/([^\/]+)\.wacc/;
-    const match = pathname.match(regex);
+    try {
+      const fileName = pathname.replace("/", "");
 
-    if (!match) {
-      console.log("invalid url");
+      const fileContents = getFileFromLocalStorage(fileName);
+
+      if (!fileContents) return;
+      store.reset();
+      store.setOutput("Compiling...");
+
+      const res = await fetch("/api/compile", {
+        method: "POST",
+        body: JSON.stringify({
+          fileContents,
+          input: store.input?.split("\n") ?? [],
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        store.setError(data.output);
+      } else {
+        store.setError("");
+        store.setOutput(data.output);
+      }
+
+      store.setExitCode(data.compilerStatus);
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const filename = match[1];
-
-    const fileContents = getFileFromLocalStorage("yeahh.wacc");
-    console.log(fileContents);
-
-    const res = await fetch("/api/compile", {
-      method: "POST",
-      body: JSON.stringify({
-        fileContents,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      store.setError(data.output);
-    } else {
-      store.setError("");
-      store.setOutput(data.output);
-    }
-
-    store.setExitCode(data.compilerStatus);
-    setIsLoading(false);
   };
 
   return (
     <div className="flex-1 flex bg-muted">
-      <div className="h-full bg-white rounded-t-lg border-t border-r p-2">
-        {filename}.wacc
-      </div>
+      {filename && (
+        <div className="h-full bg-white rounded-t-lg border-t border-r p-2">
+          <code> {filename}</code>
+        </div>
+      )}
+
       <div className="flex-1 flex justify-end pr-8 items-center">
         <Button
           variant={"ghost"}

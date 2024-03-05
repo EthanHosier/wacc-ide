@@ -7,21 +7,27 @@ import { splitAtEndOfSentence } from "@/lib/utils";
 const Output = () => {
   const store = ideStore((state: any) => state);
   return (
-    <div className="flex flex-col h-full p-6">
-      <h1 className="font-semibold">Output</h1>
+    <div className="flex flex-col h-full p-6 overflow-auto">
+      <h1 className="font-semibold">
+        <code>Output</code>
+      </h1>
 
       {store.error ? (
-        splitAtEndOfSentence(store.error).map((e) => (
-          <div className="text-red-500">{e}</div>
-        ))
+        store.error
+          .split("\n")
+          .map((e: string) => <code className="text-red-500">{e}</code>)
       ) : (
-        <div className="flex">{store.output}</div>
+        <code className="flex flex-col">
+          {store.output.split("\n").map((e: string) => (
+            <p>{e}</p>
+          ))}
+        </code>
       )}
 
       {store.exitCode != null && (
-        <div className="text-sm text-muted-foreground">
+        <code className="text-sm text-muted-foreground mt-2">
           Exit code: {store.exitCode}
-        </div>
+        </code>
       )}
     </div>
   );

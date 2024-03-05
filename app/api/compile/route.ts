@@ -9,8 +9,10 @@ const ARGUMENT = "file.wacc";
 const COMPILED_FILENAME = "file.s";
 const EXECUTABLE_NAME = "executable";
 
+const TIMEOUT_IN_SECONDS = 3;
+
 export async function POST(req: Request) {
-  const { fileContents } = await req.json();
+  const { fileContents, input } = await req.json();
 
   try {
     fs.writeFileSync("file.wacc", fileContents);
@@ -47,12 +49,26 @@ export async function POST(req: Request) {
     );
   }
 
-  const executeCommand = [`./${EXECUTABLE_NAME}`]; // Modify as needed
-  const executeResult = spawnSync(executeCommand[0], executeCommand.slice(1));
+  const inputStr = input.join(" ");
+
+  const executeCommand = [
+    "timeout",
+    `${TIMEOUT_IN_SECONDS}s`,
+    "sh",
+    "-c",
+    `echo ${inputStr} | ./${EXECUTABLE_NAME}`,
+  ];
+  const executeResult = spawnSync(executeCommand[0], executeCommand.slice(1), {
+    timeout: TIMEOUT_IN_SECONDS * 1000,
+  });
+
+  const timeout = executeResult.status === null;
+
   return NextResponse.json(
     {
-      compilerStatus: executeResult.status,
-      output: executeResult.stdout.toString(),
+      error: timeout && "Timeout",
+      compilerStatus: executeResult.status ?? 124,
+      output: timeout ? "Error: Timeout" : executeResult.stdout.toString(),
     },
     { status: 200 }
   );

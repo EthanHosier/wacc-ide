@@ -3,9 +3,11 @@
 import {
   DEFAULT_FILE_CONTENTS,
   cn,
+  deleteFileFromLocalStorage,
+  ensureWaccExtension,
   storeRecordInLocalStorage,
 } from "@/lib/utils";
-import { ChevronDown, ChevronUp, FilePlus, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, FilePlus, Plus, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy } from "lucide-react";
@@ -28,7 +30,13 @@ export type SideBarItem = {
   name: string;
   children?: SideBarItem[];
 };
-
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { toast } from "sonner";
 const SideBarItem = ({ item }: { item: SideBarItem }) => {
   const router = useRouter();
 
@@ -44,9 +52,23 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
   };
 
   const onSubmit = () => {
-    storeRecordInLocalStorage(filename, DEFAULT_FILE_CONTENTS);
+    const formattedFileName = ensureWaccExtension(filename);
+
+    storeRecordInLocalStorage(formattedFileName, DEFAULT_FILE_CONTENTS);
     // create a file
-    router.push(`/${filename}`);
+    router.push(`/${formattedFileName}`);
+    toast(`File Created`, {
+      className: "m-4",
+      description: `${filename} has been successfully created.`,
+    });
+  };
+
+  const deleteItem = () => {
+    deleteFileFromLocalStorage(item.name);
+    toast(`File Deleted`, {
+      className: "m-4",
+      description: `${item.name} has been successfully deleted.`,
+    });
   };
 
   return (
@@ -54,14 +76,23 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
       <div className="flex-1 flex">
         <div className="flex mb-1">
           {item.children && (isOpen ? <ChevronDown /> : <ChevronUp />)}
-          <span
-            className={cn("hover:cursor-pointer", {
-              "font-semibold": item.children,
-            })}
-            onClick={onClick}
-          >
-            {item.name}
-          </span>
+          <ContextMenu>
+            <ContextMenuTrigger disabled={!!item.children}>
+              <code
+                className={cn("hover:cursor-pointer", {
+                  "font-semibold": item.children,
+                })}
+                onClick={onClick}
+              >
+                {item.name}
+              </code>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem onClick={deleteItem} className="text-red-500">
+                Delete
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </div>
         {item.children && (
           <div className="flex-1 flex justify-end">

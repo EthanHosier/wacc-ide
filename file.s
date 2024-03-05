@@ -1,8 +1,8 @@
 .globl main
 .section .data
-        .int 14
+        .int 10
 .L.str0:
-        .asciz "Hello Wacccccc"
+        .asciz "Hello Wacc"
 .text
 main:
         pushq %rbp

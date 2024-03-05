@@ -1,24 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SideBarItem, { type SideBarItem as sbt } from "./sidebar-item";
-import { getAllFilenamesFromLocalStorage } from "@/lib/utils";
-
-const data: sbt = {
-  name: "Wacc-IDE",
-  children: getAllFilenamesFromLocalStorage().map((filename) => ({
-    name: filename,
-  })),
-};
-
-console.log({ filenames: getAllFilenamesFromLocalStorage() });
+import {
+  LOCAL_STORAGE_CHANGE_EVENT,
+  getAllFilenamesFromLocalStorage,
+} from "@/lib/utils";
 
 const SideBar = () => {
-  return (
-    <div className="">
-      <SideBarItem item={data} />
-    </div>
-  );
+  const [data, setData] = useState<sbt | null>(null);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log("STORAGE CHANGE");
+      const newData: sbt = {
+        name: "Wacc-IDE",
+        children: getAllFilenamesFromLocalStorage().map((filename) => ({
+          name: filename,
+        })),
+      };
+      setData(newData);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(LOCAL_STORAGE_CHANGE_EVENT, handleStorageChange);
+
+    handleStorageChange();
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        LOCAL_STORAGE_CHANGE_EVENT,
+        handleStorageChange
+      );
+    };
+  }, []);
+
+  return <div className="">{data && <SideBarItem item={data} />}</div>;
 };
 
 export default SideBar;
