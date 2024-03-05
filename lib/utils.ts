@@ -136,20 +136,15 @@ export function extractSemanticErrorInformation(
   errorText: string;
   endColNumber?: number;
 } | null {
-  //console.log({ errorText, fileText });
-
   const semanticErr =
     errorText.split("expression: ")[1]?.split("\n")[0] ||
     extractExpectedString(errorText)?.split("\n")[0]?.split("in ")[1];
-
-  console.log({ semanticErr });
 
   if (!semanticErr) return null;
 
   let lineNumber = -1;
   const lines = fileText.split("\n");
 
-  console.log(lines);
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].replace(/\s/g, "").includes(semanticErr.replace(/\s/g, ""))) {
       lineNumber = i;
@@ -157,7 +152,6 @@ export function extractSemanticErrorInformation(
     }
   }
 
-  console.log(lineNumber);
   if (lineNumber === -1) return null;
 
   const pos = findSubstringPosition(lines[lineNumber], semanticErr);
