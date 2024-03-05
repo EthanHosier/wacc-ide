@@ -40,7 +40,7 @@ import { toast } from "sonner";
 const SideBarItem = ({ item }: { item: SideBarItem }) => {
   const router = useRouter();
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(true);
   const [filename, setFilename] = useState<string>("");
 
   const pathname = usePathname();
@@ -123,7 +123,11 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction asChild>
-                    <Button type="submit" onClick={onSubmit}>
+                    <Button
+                      type="submit"
+                      onClick={onSubmit}
+                      disabled={!filename}
+                    >
                       Submit
                     </Button>
                   </AlertDialogAction>

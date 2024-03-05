@@ -1,3 +1,5 @@
 begin 
-	println "Hello Wacc"
+	int x = 3;
+	read x;
+	println x
 end

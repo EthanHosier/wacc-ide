@@ -1,20 +1,24 @@
 .globl main
 .section .data
-        .int 10
-.L.str0:
-        .asciz "Hello Wacc"
 .text
 main:
         pushq %rbp
+        pushq %r12
         movq  %rsp, %rbp
         subq  $0, %rsp
-        leaq  .L.str0(%rip), %rax
+        movl  $3, %eax
+        movq  %rax, %r12
+        movq  %r12, %rdi
+        call  _readi
+        movq  %rax, %r12
+        movq  %r12, %rax
         movq  %rax, %rdi
-        call  _prints
+        call  _printi
         call  _printn
         movq  $0, %rax
-        addq  $0, %rsp
+        addq  $4, %rsp
         movq  %rbp, %rsp
+        popq  %r12
         popq  %rbp
         ret
 

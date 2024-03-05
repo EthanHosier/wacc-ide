@@ -36,11 +36,12 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
 
   useEffect(() => {
     if (!monaco) return;
+
     // Register the WACC language
     monaco.languages.register({ id: "wacc" });
     // Define the language configuration
     monaco.languages.setMonarchTokensProvider("wacc", waccSyntaxRules);
-    monaco.languages.registerCompletionItemProvider(
+    const { dispose } = monaco.languages.registerCompletionItemProvider(
       "wacc",
       waccCompletionItemProvider
     );
@@ -51,6 +52,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
       if (saveTimeout.current) {
         clearTimeout(saveTimeout.current);
       }
+      dispose();
     };
   }, [monaco]);
 
