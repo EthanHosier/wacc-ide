@@ -12,8 +12,8 @@ import {
 } from "@/wacc-syntax-rules";
 import {
   DEFAULT_FILE_CONTENTS,
-  extractErrorInformation,
-  findSemanticErrorLocation,
+  extractSemanticErrorInformation,
+  extractSyntaxErrorInformation,
   getFileFromLocalStorage,
   storeRecordInLocalStorage,
 } from "@/lib/utils";
@@ -59,15 +59,25 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
   useEffect(() => {
     if (!monaco || !store.error || !editor) return;
 
-    const errorInfo = extractErrorInformation(store.error);
-    if (!errorInfo) return;
+    let errorInfo = extractSyntaxErrorInformation(store.error);
+    if (!errorInfo) {
+      errorInfo = extractSemanticErrorInformation(
+        store.error,
+        editor.getValue()!
+      );
+      if (!errorInfo) return;
+    }
+    console.log({ errorInfo });
     const errorMarker = {
       severity: monaco.MarkerSeverity.Error,
       message: errorInfo.errorText,
       startLineNumber: errorInfo.lineNumber,
       startColumn: errorInfo.columnNumber,
       endLineNumber: errorInfo.lineNumber,
-      endColumn: errorInfo.columnNumber + 1,
+      endColumn:
+        (errorInfo.endColNumber
+          ? errorInfo.endColNumber
+          : errorInfo.columnNumber) + 1,
     };
     monaco.editor.setModelMarkers(editor.getModel()!, "your-marker-key", [
       errorMarker,

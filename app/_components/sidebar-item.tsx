@@ -51,6 +51,7 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
       return;
     }
     router.push(`/${item.name}`);
+    ``;
   };
 
   const onSubmit = () => {

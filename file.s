@@ -3,22 +3,23 @@
 .text
 main:
         pushq %rbp
-        pushq %r12
         movq  %rsp, %rbp
         subq  $0, %rsp
-        movl  $3, %eax
-        movq  %rax, %r12
-        movq  %r12, %rdi
-        call  _readi
-        movq  %rax, %r12
-        movq  %r12, %rax
-        movq  %rax, %rdi
-        call  _printi
-        call  _printn
-        movq  $0, %rax
-        addq  $4, %rsp
+        jmp   .L0
+.L1:
+        pushq %rbp
+        movq  %rsp, %rbp
+        subq  $0, %rsp
+        addq  $0, %rsp
         movq  %rbp, %rsp
-        popq  %r12
+        popq  %rbp
+.L0:
+        movq  $1, %rax
+        cmpq  $1, %rax
+        je .L1
+        movq  $0, %rax
+        addq  $0, %rsp
+        movq  %rbp, %rsp
         popq  %rbp
         ret
 
@@ -354,7 +355,7 @@ _arrLoad8:
         .asciz "fatal error: integer overflow or underflow occurred\n"
 .text
 _errOverflow:
-        addq  $-16, %rsp
+        subq  $16, %rsp
         leaq  .errOverflow(%rip), %rdi
         call  _prints
         movb  $-1, %dil
@@ -365,7 +366,7 @@ _errOverflow:
         .asciz "fatal error: division or modulo by zero\n"
 .text
 _errDivZero:
-        addq  $-16, %rsp
+        subq  $16, %rsp
         leaq  .errDivZero(%rip), %rdi
         call  _prints
         movb  $-1, %dil
@@ -376,7 +377,7 @@ _errDivZero:
         .asciz "fatal error: out of memory\n"
 .text
 _errOutOfMemory:
-        addq  $-16, %rsp
+        subq  $16, %rsp
         leaq  .errOutOfMemory(%rip), %rdi
         call  _prints
         movb  $-1, %dil
@@ -387,7 +388,7 @@ _errOutOfMemory:
         .asciz "fatal error: null pair dereferenced or freed\n"
 .text
 _errNull:
-        addq  $-16, %rsp
+        subq  $16, %rsp
         leaq  .errNull(%rip), %rdi
         call  _prints
         movb  $-1, %dil

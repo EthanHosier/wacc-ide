@@ -103,7 +103,7 @@ export const waccCompletionItemProvider: monaco.languages.CompletionItemProvider
 export const languageConfiguration = {
   onEnterRules: [
     {
-      beforeText: new RegExp(`\\b(?:begin|then|is)\\s*$`),
+      beforeText: new RegExp(`\\b(?:begin|then|is|do)\\s*$`),
       action: {
         indentAction: monaco.languages.IndentAction.Indent,
         appendText: "",

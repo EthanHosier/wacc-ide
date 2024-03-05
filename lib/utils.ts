@@ -97,9 +97,22 @@ export const splitAtEndOfSentence = (inputString: string) => {
   return nonEmptySentences;
 };
 
-export function extractErrorInformation(
-  errorText: string
-): { lineNumber: number; columnNumber: number; errorText: string } | null {
+export function ensureWaccExtension(filename: string): string {
+  // Check if the filename ends with '.wacc'
+  if (!filename.endsWith(".wacc")) {
+    // If not, add '.wacc' to the end
+    filename += ".wacc";
+  }
+
+  return filename;
+}
+
+export function extractSyntaxErrorInformation(errorText: string): {
+  lineNumber: number;
+  columnNumber: number;
+  errorText: string;
+  endColNumber?: number;
+} | null {
   const regex = /\(line (\d+), column (\d+)\):\n\s+(.*?)\n/g;
   const match = regex.exec(errorText);
 
@@ -114,46 +127,83 @@ export function extractErrorInformation(
   return null;
 }
 
-export function findSemanticErrorLocation(code: string, errorMessage: string) {
-  // Split the code into lines
-  const lines = code.split("\n");
+export function extractSemanticErrorInformation(
+  errorText: string,
+  fileText: string
+): {
+  lineNumber: number;
+  columnNumber: number;
+  errorText: string;
+  endColNumber?: number;
+} | null {
+  //console.log({ errorText, fileText });
 
-  // Find the line containing "in" (case-insensitive)
-  const inLineIndex = lines.findIndex(
-    (line) => line.trim().toLowerCase() === "in"
-  );
+  const semanticErr = extractExpectedString(errorText)
+    ?.split("\n")[0]
+    ?.split("in ")[1];
 
-  if (inLineIndex === -1) {
-    // "in" not found, return an error message
-    return "Error: 'in' not found in the code.";
+  console.log({ semanticErr });
+
+  if (!semanticErr) return null;
+
+  let lineNumber = -1;
+  const lines = fileText.split("\n");
+
+  console.log(lines);
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].replace(/\s/g, "").includes(semanticErr.replace(/\s/g, ""))) {
+      lineNumber = i;
+      break;
+    }
   }
 
-  // Find the line with the error message
-  const errorLineIndex = lines.findIndex(
-    (line, index) => index > inLineIndex && line.includes(errorMessage)
-  );
+  console.log(lineNumber);
+  if (lineNumber === -1) return null;
 
-  if (errorLineIndex === -1) {
-    // Error message not found, return an error message
-    return "Error: Semantic error message not found in the code after 'in'.";
-  }
+  const pos = findSubstringPosition(lines[lineNumber], semanticErr);
 
-  // Extract the position of the error in the line
-  const errorPosition = lines[errorLineIndex].indexOf(errorMessage);
+  const err = errorText.split("returned:")[1];
 
-  // Return the location information
   return {
-    line: errorLineIndex + 1, // Line numbers start from 1
-    column: errorPosition + 1, // Column numbers start from 1
+    lineNumber: lineNumber + 1,
+    columnNumber: (pos?.firstCharIndex ?? -2) + 1,
+    errorText: err,
+    endColNumber: (pos?.lastCharIndex ?? -2) + 1,
   };
 }
 
-export function ensureWaccExtension(filename: string): string {
-  // Check if the filename ends with '.wacc'
-  if (!filename.endsWith(".wacc")) {
-    // If not, add '.wacc' to the end
-    filename += ".wacc";
-  }
+function extractExpectedString(inputString: string) {
+  const regex = /Expected (.+), but got (.+)\n(.+)/;
+  const match = inputString.match(regex);
 
-  return filename;
+  if (match) {
+    // Extract the string after the expected/got message
+    const extractedString = match[3].trim();
+    return extractedString;
+  } else {
+    // Return null if the pattern is not found
+    return null;
+  }
+}
+
+function findSubstringPosition(mainString: string, subString: string) {
+  // Escape special characters in the substring for creating a RegExp
+  const escapedSubString = subString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Create a regular expression to match the substring with any whitespace
+  const regex = new RegExp(escapedSubString.split(/\s+/).join("\\s*"));
+
+  // Find the match in the main string
+  const match = mainString.match(regex);
+
+  if (match) {
+    // Get the position of the first and last character of the substring
+    const firstCharIndex = match.index;
+    const lastCharIndex = firstCharIndex! + match[0].length - 1;
+
+    return { firstCharIndex, lastCharIndex };
+  } else {
+    // Return null if the substring is not found
+    return null;
+  }
 }

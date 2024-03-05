@@ -1,5 +1,11 @@
 begin 
-	int x = 3;
-	read x;
-	println x
+	if(true) then
+		if(true) then
+			int x = "yeahh"
+		else
+			skip
+		fi
+	else
+		skip
+	fi
 end
