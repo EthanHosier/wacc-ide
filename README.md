@@ -14,7 +14,7 @@ Install Dependencies:
 cd wacc-ide && npm i
 ```
 
-Build the project and start.
+Build the project and start
 
 ```
 npm run build && npm start
