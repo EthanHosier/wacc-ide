@@ -9,7 +9,7 @@ import {
 } from "@/lib/utils";
 import { ChevronDown, ChevronUp, FilePlus, Plus, Trash } from "lucide-react";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,8 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>("");
 
+  const pathname = usePathname();
+
   const onClick = () => {
     if (item.children) {
       setIsOpen(!isOpen);
@@ -59,7 +61,7 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
     router.push(`/${formattedFileName}`);
     toast(`File Created`, {
       className: "m-4",
-      description: `${filename} has been successfully created.`,
+      description: `${formattedFileName} has been successfully created.`,
     });
   };
 
@@ -69,6 +71,7 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
       className: "m-4",
       description: `${item.name} has been successfully deleted.`,
     });
+    if (item.name === pathname.replace("/", "")) router.push("/");
   };
 
   return (
@@ -133,8 +136,8 @@ const SideBarItem = ({ item }: { item: SideBarItem }) => {
 
       {isOpen && (
         <div className="ml-8">
-          {item.children?.map((child) => (
-            <SideBarItem item={child} />
+          {item.children?.map((child, i) => (
+            <SideBarItem item={child} key={i} />
           ))}
         </div>
       )}

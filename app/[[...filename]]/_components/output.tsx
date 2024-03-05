@@ -13,13 +13,15 @@ const Output = () => {
       </h1>
 
       {store.error ? (
-        store.error
-          .split("\n")
-          .map((e: string) => <code className="text-red-500">{e}</code>)
+        store.error.split("\n").map((e: string, i: number) => (
+          <code className="text-red-500" key={i}>
+            {e}
+          </code>
+        ))
       ) : (
         <code className="flex flex-col">
-          {store.output.split("\n").map((e: string) => (
-            <p>{e}</p>
+          {store.output.split("\n").map((e: string, i: number) => (
+            <p key={i}>{e}</p>
           ))}
         </code>
       )}
