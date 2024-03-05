@@ -57,8 +57,6 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
   useEffect(() => {
     if (!monaco || !store.error || !editor) return;
 
-    console.log(findSemanticErrorLocation(editor.getValue(), store.error));
-
     const errorInfo = extractErrorInformation(store.error);
     if (!errorInfo) return;
     const errorMarker = {
@@ -95,7 +93,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
   return (
     <>
       {!savedFileContents ? (
-        <div className="p-4">{fileName && "Error: {fileName} not found"}</div>
+        <div className="p-4">{fileName && `Error: ${fileName} not found`}</div>
       ) : (
         <Editor
           onMount={(editor, monaco) => setEditor(editor)}

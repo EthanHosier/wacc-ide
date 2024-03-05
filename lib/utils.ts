@@ -20,8 +20,6 @@ export const storeRecordInLocalStorage = (
 
     // Store the JSON string in local storage
     localStorage.setItem(filename, jsonData);
-
-    console.log(`Record successfully stored in local storage: ${filename}`);
   } catch (error: any) {
     console.error(`Error storing record in local storage: ${error.message}`);
   }
@@ -37,8 +35,6 @@ export const getAllFilenamesFromLocalStorage = (): string[] => {
     const waccFilenames = allFilenames.filter((filename) =>
       filename.endsWith(".wacc")
     );
-
-    console.log("WACC filenames retrieved from local storage:", waccFilenames);
 
     return waccFilenames;
   } catch (error: any) {
@@ -62,8 +58,6 @@ export const getFileFromLocalStorage = (filename: string): string | null => {
     // Parse the JSON string to retrieve the file content
     const fileContent = JSON.parse(jsonData)[filename];
 
-    console.log(`File content retrieved for filename: ${filename}`);
-
     return fileContent;
   } catch (error: any) {
     console.error(`Error retrieving file from local storage: ${error.message}`);
@@ -75,8 +69,6 @@ export const deleteFileFromLocalStorage = (filename: string) => {
   try {
     // Remove the item from local storage using the provided key
     localStorage.removeItem(filename);
-
-    console.log(`Record successfully deleted from local storage: ${filename}`);
 
     // Dispatch the custom storage change event
     const customEvent = new Event(LOCAL_STORAGE_CHANGE_EVENT);

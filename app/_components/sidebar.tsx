@@ -12,7 +12,6 @@ const SideBar = () => {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      console.log("STORAGE CHANGE");
       const newData: sbt = {
         name: "Wacc-IDE",
         children: getAllFilenamesFromLocalStorage().map((filename) => ({
