@@ -138,7 +138,15 @@ export function extractSemanticErrorInformation(
 } | null {
   const semanticErr =
     errorText.split("expression: ")[1]?.split("\n")[0] ||
-    extractExpectedString(errorText)?.split("\n")[0]?.split("in ")[1];
+    extractExpectedString(errorText)?.split("\n")[0]?.split("in ")[1] ||
+    errorText.split("declaration!\n")[1]?.split("\n")[1]?.split("in ")[1] ||
+    errorText.split("main\n")[1]?.split("in ")[1]?.split("\n")[0] ||
+    errorText
+      .trim()
+      .split("\n")
+      [errorText.trim().split("\n").length - 1]?.split("in ")[1];
+
+  // console.log({ semanticErr });
 
   if (!semanticErr) return null;
 

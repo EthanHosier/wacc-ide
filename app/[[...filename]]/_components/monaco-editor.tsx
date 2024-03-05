@@ -67,7 +67,6 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({ fileName }) => {
       );
       if (!errorInfo) return;
     }
-    console.log({ errorInfo });
     const errorMarker = {
       severity: monaco.MarkerSeverity.Error,
       message: errorInfo.errorText,
