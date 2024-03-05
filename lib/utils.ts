@@ -138,9 +138,9 @@ export function extractSemanticErrorInformation(
 } | null {
   //console.log({ errorText, fileText });
 
-  const semanticErr = extractExpectedString(errorText)
-    ?.split("\n")[0]
-    ?.split("in ")[1];
+  const semanticErr =
+    errorText.split("expression: ")[1]?.split("\n")[0] ||
+    extractExpectedString(errorText)?.split("\n")[0]?.split("in ")[1];
 
   console.log({ semanticErr });
 
