@@ -50,13 +50,14 @@ export async function POST(req: Request) {
   }
 
   const inputStr = input.join(" ");
+  const sanitizedInputStr = sanitizeInput(inputStr);
 
   const executeCommand = [
     "timeout",
     `${TIMEOUT_IN_SECONDS}s`,
     "sh",
     "-c",
-    `echo ${inputStr} | ./${EXECUTABLE_NAME}`,
+    `echo "${sanitizedInputStr}" | ./${EXECUTABLE_NAME}`,
   ];
   const executeResult = spawnSync(executeCommand[0], executeCommand.slice(1), {
     timeout: TIMEOUT_IN_SECONDS * 1000,
@@ -72,4 +73,8 @@ export async function POST(req: Request) {
     },
     { status: 200 }
   );
+}
+
+function sanitizeInput(inputStr: string) {
+  return inputStr.replace(/[$`"\\]/g, "\\$&");
 }
